@@ -1,27 +1,14 @@
-<?php
+<?php  
 
 namespace Freemius;
 
 use Freemius\Exceptions\Freemius_Exception;
 
-if (! defined('FS_API__VERSION')) {
-    define('FS_API__VERSION', '1');
-}
-if (! defined('FS_SDK__PATH')) {
-    define('FS_SDK__PATH', dirname(__FILE__));
-}
-if (! defined('FS_SDK__EXCEPTIONS_PATH')) {
-    define('FS_SDK__EXCEPTIONS_PATH', FS_SDK__PATH . '/Exceptions/');
-}
 
-if (! function_exists('json_decode')) {
-    throw new \Exception('Freemius needs the JSON PHP extension.');
-}
-
-
-if (! class_exists('Freemius_Api_Base')) {
-    abstract class Freemius_Api_Base
+if (! class_exists('FreemiusBase')) {
+    abstract class FreemiusBase
     {
+        protected const FS_API_VERSION = 1;
         public const VERSION = '1.0.4';
         public const FORMAT = 'json';
 
@@ -93,7 +80,7 @@ if (! class_exists('Freemius_Api_Base')) {
                     throw new Freemius_Exception('Scope not implemented.');
             }
 
-            return '/v' . FS_API__VERSION . $base .
+            return '/v' . self::FS_API_VERSION . $base .
                 (!empty($pPath) ? '/' : '') . $pPath .
                 ((false === strpos($pPath, '.')) ? '.' . self::FORMAT : '') . $query;
         }
@@ -131,7 +118,7 @@ if (! class_exists('Freemius_Api_Base')) {
          */
         public function Test()
         {
-            $pong = $this->_Api('/v' . FS_API__VERSION . '/ping.json');
+            $pong = $this->_Api('/v' . self::FS_API_VERSION . '/ping.json');
 
             return (is_object($pong) && isset($pong->api) && 'pong' === $pong->api);
         }
@@ -145,7 +132,7 @@ if (! class_exists('Freemius_Api_Base')) {
         public function FindClockDiff()
         {
             $time = time();
-            $pong = $this->_Api('/v' . FS_API__VERSION . '/ping.json');
+            $pong = $this->_Api('/v' . self::FS_API_VERSION . '/ping.json');
             return ($time - strtotime($pong->timestamp));
         }
 

@@ -1,4 +1,4 @@
-<?php
+<?php  
 
 namespace Freemius;
 
@@ -9,22 +9,12 @@ if (! function_exists('curl_init')) {
 }
 
 
-define('FS_SDK__USER_AGENT', 'fs-php-' . Freemius_Api_Base::VERSION);
-
-$curl_version = curl_version();
-
-define('FS_API__PROTOCOL', version_compare($curl_version['version'], '7.37', '>=') ? 'https' : 'http');
-
-if (! defined('FS_API__ADDRESS')) {
-    define('FS_API__ADDRESS', FS_API__PROTOCOL . '://api.freemius.com');
-}
-if (! defined('FS_API__SANDBOX_ADDRESS')) {
-    define('FS_API__SANDBOX_ADDRESS', FS_API__PROTOCOL . '://sandbox-api.freemius.com');
-}
-
-if (! class_exists('Freemius_Api')) {
-    class Freemius_Api extends Freemius_Api_Base
+if (! class_exists('Freemius')) {
+    class Freemius extends FreemiusBase
     {
+        private const FS_SDK_USER_AGENT = 'fs-php-' . FreemiusBase::VERSION;
+        private const FS_API_ADDRESS = 'https://api.freemius.com';
+        private const FS_API_SANDBOX_ADDRESS = 'https://sandbox-api.freemius.com';
         /**
          * Default options for curl.
          */
@@ -32,7 +22,7 @@ if (! class_exists('Freemius_Api')) {
             CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 60,
-            CURLOPT_USERAGENT      => FS_SDK__USER_AGENT,
+            CURLOPT_USERAGENT      => self::FS_SDK_USER_AGENT,
             CURLOPT_HTTPHEADER     => array()
         );
 
@@ -55,7 +45,7 @@ if (! class_exists('Freemius_Api')) {
 
         public function GetUrl($pCanonizedPath = '')
         {
-            return ($this->_sandbox ? FS_API__SANDBOX_ADDRESS : FS_API__ADDRESS) . $pCanonizedPath;
+            return ($this->_sandbox ? self::FS_API_SANDBOX_ADDRESS : self::FS_API_ADDRESS) . $pCanonizedPath;
         }
 
         /**

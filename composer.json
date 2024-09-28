@@ -12,7 +12,8 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Freemius\\": "src/"
+            "Freemius\\": "src/",
+        "Freemius\\Exceptions\\": "src/Exceptions/"
         }
     },
     "require": {
