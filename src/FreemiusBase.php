@@ -1,9 +1,8 @@
-<?php  
+<?php
 
 namespace Freemius;
 
 use Freemius\Exceptions\Freemius_Exception;
-
 
 if (! class_exists('FreemiusBase')) {
     abstract class FreemiusBase
