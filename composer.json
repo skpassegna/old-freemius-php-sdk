@@ -3,8 +3,19 @@
     "description": "Freemius PHP SDK",
     "keywords": ["freemius", "sdk", "php"],
     "homepage": "https://freemius.com",
-    "license": "GPL-2.0+",	
+    "license": "GPL-2.0+",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "OldFreemius\\": "src/"
+        }
+    },
     "require": {
-        "php": ">=5.2"
-	}
+        "php": "^7.2 || ^8.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OldFreemius\\Tests\\": "tests/"
+        }
+    }
 }
