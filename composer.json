@@ -8,7 +8,7 @@
     ],
     "homepage": "https://github.com/skpassegna/old-freemius-php-sdk",
     "license": "GPL-2.0+",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "type": "library",
     "autoload": {
         "psr-4": {
