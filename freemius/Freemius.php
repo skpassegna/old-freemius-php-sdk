@@ -1,8 +1,10 @@
 <?php
     namespace OldFreemius;
 
+    use OldFreemius\Exceptions\Freemius_Exception;
+
     if ( ! function_exists('curl_init'))
-        throw new Exception('Freemius needs the CURL PHP extension.');
+        throw new \Exception('Freemius needs the CURL PHP extension.');
 
 
     define('FS_SDK__USER_AGENT', 'fs-php-' . Freemius_Api_Base::VERSION);
@@ -282,7 +284,7 @@
                     {
                         if (strlen(@inet_pton($matches[1])) === 16)
                         {
-                            self::errorLog('Invalid IPv6 configuration on server, Please disable or get native IPv6 on your server.');
+                            throw new \Exception('Invalid IPv6 configuration on server, Please disable or get native IPv6 on your server.');
                             self::$CURL_OPTS[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
                             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
                             $result = curl_exec($ch);
@@ -371,7 +373,7 @@
                 $ext = explode('.', $pFilename)[1];
 
                 if ( ! isset($mime_types[$ext]))
-                    throw new Exception('Unknown file type');
+                    throw new \Exception('Unknown file type');
 
                 return $mime_types[$ext];
             }

@@ -1,6 +1,9 @@
 <?php
     namespace OldFreemius;
 
+
+    use OldFreemius\Exceptions\Freemius_Exception;
+
     if ( ! defined( 'FS_API__VERSION' ) ) {
         define( 'FS_API__VERSION', '1' );
     }
@@ -12,7 +15,7 @@
     }
 
     if ( ! function_exists( 'json_decode' ) ) {
-        throw new Exception( 'Freemius needs the JSON PHP extension.' );
+        throw new \Exception( 'Freemius needs the JSON PHP extension.' );
     }
 
 
@@ -107,7 +110,7 @@
                 {
                     // Map to error object.
                     $result = json_encode($e->getResult());
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     // Map to error object.
                     $result = json_encode(array(
                         'error' => array(

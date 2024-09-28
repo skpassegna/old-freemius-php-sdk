@@ -7,7 +7,7 @@ namespace OldFreemius\Exceptions;
     * Thrown when an API call returns an exception.
     *
     */
-    class Freemius_Exception extends Exception
+    class Freemius_Exception extends \Exception
     {
         protected $_result;
         protected $_type;
