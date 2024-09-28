@@ -1,6 +1,6 @@
 {
     "name": "skpassegna/old-freemius-php-sdk",
-    "description": "Freemius PHP SDK",
+    "description": "Freemius PHP SDK (PSR-4 autoloading compatible)",
     "keywords": [
         "freemius",
         "sdk",
