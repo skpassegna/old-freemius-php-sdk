@@ -1,2 +1,22 @@
-vendor/
-composer.lock
+# Composer dependencies
+/vendor/
+
+# PHP CS Fixer cache
+.php-cs-fixer.cache
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
+
+# Example deployment
+example-deployment.php
