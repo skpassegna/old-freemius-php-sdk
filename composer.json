@@ -1,21 +1,17 @@
 {
-    "name": "freemius/php-sdk",
+    "name": "skpassegna/old-freemius-php-sdk",
     "description": "Freemius PHP SDK",
     "keywords": ["freemius", "sdk", "php"],
-    "homepage": "https://freemius.com",
+    "homepage": "https://github.com/skpassegna/old-freemius-php-sdk",
     "license": "GPL-2.0+",
+    "version": "1.0.0",
     "type": "library",
     "autoload": {
         "psr-4": {
-            "OldFreemius\\": "src/"
+            "OldFreemius\\": "freemius/"
         }
     },
     "require": {
         "php": "^7.2 || ^8.0"
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "OldFreemius\\Tests\\": "tests/"
-        }
     }
 }

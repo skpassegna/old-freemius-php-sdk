@@ -1,4 +1,7 @@
 <?php
+
+    namespace OldFreemius\Exceptions;
+
     class Freemius_OAuthException extends Freemius_Exception
     {
         public function __construct($pResult)
