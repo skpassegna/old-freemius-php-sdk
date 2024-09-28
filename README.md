@@ -5,7 +5,7 @@ As a plugin or theme developer using Freemius, you can access your data via the 
 If you only need to access one product, we recommend using the `plugin` scope. You can get the product's credentials in *SETTINGS -> Keys*.
 If you need to access multiple products, use the `developer` scope. To get your credentials, click on *My Profile* at the top right menu and you'll find it in the *Keys* section.
 
-## Install
+## Installation
 
 ```composer require skpassegna/old-freemius-php-sdk```
 
