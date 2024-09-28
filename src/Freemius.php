@@ -1,8 +1,8 @@
 <?php
 
-namespace OldFreemius;
+namespace Freemius;
 
-use OldFreemius\Exceptions\Freemius_Exception;
+use Freemius\Exceptions\Freemius_Exception;
 
 if (! function_exists('curl_init')) {
     throw new \Exception('Freemius needs the CURL PHP extension.');

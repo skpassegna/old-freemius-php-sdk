@@ -15,7 +15,7 @@ If you need to access multiple products, use the `developer` scope. To get your 
 <?php
   require_once './vendor/autoload.php';
 
-  use OldFreemius\Freemius_Api;
+  use Freemius\Freemius_Api;
 
   define( 'FS__API_SCOPE', 'developer' );
   define( 'FS__API_DEV_ID', 1234 );

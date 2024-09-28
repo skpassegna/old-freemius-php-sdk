@@ -1,6 +1,6 @@
 <?php
 
-namespace OldFreemius\Exceptions;
+namespace Freemius\Exceptions;
 
 /**
 * Thrown when an API call returns an exception.

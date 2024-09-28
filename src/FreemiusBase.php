@@ -1,8 +1,8 @@
 <?php
 
-namespace OldFreemius;
+namespace Freemius;
 
-use OldFreemius\Exceptions\Freemius_Exception;
+use Freemius\Exceptions\Freemius_Exception;
 
 if (! defined('FS_API__VERSION')) {
     define('FS_API__VERSION', '1');

@@ -1,6 +1,6 @@
 <?php
 
-namespace OldFreemius\Exceptions;
+namespace Freemius\Exceptions;
 
 class Freemius_OAuthException extends Freemius_Exception
 {
