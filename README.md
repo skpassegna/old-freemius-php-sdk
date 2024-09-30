@@ -1,104 +1,184 @@
 # Freemius PHP SDK
-This SDK is a wrapper for accessing the API. It handles the endpoint's path and authorization signature generation.
 
-As a plugin or theme developer using Freemius, you can access your data via the `developer` scope or `plugin` scope. 
-If you only need to access one product, we recommend using the `plugin` scope. You can get the product's credentials in *SETTINGS -> Keys*.
-If you need to access multiple products, use the `developer` scope. To get your credentials, click on *My Profile* at the top right menu and you'll find it in the *Keys* section.
+
+This SDK provides a PHP interface for interacting with the Freemius API from your own server-side applications or scripts. It handles authentication, request signing, and response parsing, enabling you to access and manage your Freemius account data, user information, plugin/theme installations, licenses, payments, and more – all from outside of your WordPress plugin or theme.
+
+**Note:** A new, improved SDK is currently under development (by @skpassegna).
+
+This SDK is particularly useful for building custom dashboards, reporting tools, integration with other services, or performing administrative tasks related to your Freemius products. It is *not* intended for use within your WordPress plugins or themes themselves; that's the role of the Freemius WordPress SDK.
+
 
 ## Installation
 
-```composer require skpassegna/old-freemius-php-sdk```
+Use Composer to install the SDK:
+
+```bash
+composer require skpassegna/old-freemius-php-sdk
+```
 
 ## Usage
 
-```php
-<?php
-require_once "./vendor/autoload.php";
-
-use Freemius\Freemius;
-use Freemius\FreemiusBase;
-
-$scope = 'developer';
-$entId = 17789;
-$publicKey = 'pk_YOUR_PUBLIC_KEY';
-$privateKey = 'sk_YOUR_SECRET_KEY';
-$sandbox = true; // Or false (default) for production
-
-
-
-$freemius = new Freemius(
-    $scope,
-    $entId,
-    $publicKey,
-    $privateKey,
-    $sandbox
-);
-
-$plugins = $freemius->Api('/plugins.json');
-
-dd($plugins);
-```
-
-Deploy a plugin
+Here's a basic example demonstrating how to retrieve your plugin's information:
 
 ```php
 <?php
-
-/**
- * This script demonstrates how to use the Freemius SDK to deploy (publish a release) on Freemius.
- * 
- * Important Notes:
- * - The script initializes the Freemius API using developer credentials.
- * - It uploads a plugin (as a .zip file) and deploys a new version of the plugin to Freemius.
- * - After deploying, the script generates download URLs for both the free and paid versions of the plugin.
- * - This is just a demonstration and should be adjusted for a production environment.
- * 
- * Usage:
- * - Replace 'FS__API_DEV_ID', 'FS__API_PUBLIC_KEY', and 'FS__API_SECRET_KEY' with actual developer credentials.
- * - The 'file' parameter in the deployment section should point to the actual plugin zip file.
- * - Ensure you handle API errors and responses in real-world scenarios, as this demo skips error checking.
- * - The 'file_put_contents()' section shows how you might download the paid version of the plugin to the local filesystem.
- * 
- * Disclaimer:
- * - This script is intended for demonstration purposes only and should not be used as-is in a production environment.
- * - Sensitive information such as API keys should be stored securely and not hardcoded directly into your scripts.
- */
-
-require_once './vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Freemius\Freemius;
+use Freemius\Exceptions\Freemius_Exception;
 
-$scope = 'developer';  // API scope is set to 'developer' for accessing developer endpoints
-$entId = 17789;  // Replace this with your actual Freemius Developer ID
-$publicKey = 'pk_YOUR_PUBLIC_KEY';  // Replace with your actual public key
-$privateKey = 'sk_YOUR_SECRET_KEY';  // Replace with your actual secret key
+// Your Freemius credentials (obtain these from your Freemius dashboard)
+$scope = 'plugin'; // Use 'developer' if working across multiple plugins, 'install' for a single installation, or 'user' for user-related actions.
+$id = YOUR_PLUGIN_ID;  // Replace with your plugin/developer/install/user ID, depending on the scope.
+$publicKey = 'pk_YOUR_PUBLIC_KEY'; // Replace with your public key
+$secretKey = 'sk_YOUR_SECRET_KEY'; // Replace with your secret key
+$isSandbox = false; // Set to true for sandbox mode
 
-// Initialize the Freemius SDK with the developer credentials
-$api = new Freemius(
-    $scope,
-    $entId,
-    $publicKey,
-    $privateKey
-);
+$fs = new Freemius($scope, $id, $publicKey, $secretKey, $isSandbox);
 
-// Deploy a new version of the plugin by uploading a zip file.
-// This is a POST request to the 'tags' endpoint for plugin versioning.
-$tag = $api->Api('plugins/115/tags.json', 'POST', array(
-    'add_contributor' => true // Add contributor information to the plugin release
-), array(
-    'file' => './my-plugin.zip'  // Path to the plugin's zip file
-));
+try {
+    if ($fs->Test()) { // Test Connectivity to Freemius API
+        echo "Freemius connection successful!\n";
+        $plugin = $fs->Api('/.json'); // Retrieves current plugin's information (requires 'plugin' scope).
+        print_r($plugin);
 
-// Generate signed (secure) download URLs for both the free and paid versions of the plugin.
-$free_version_download_url = $api->GetSignedUrl("/plugins/{$tag->plugin_id}/tags/{$tag->id}.zip?is_premium=false");
-$paid_version_download_url = $api->GetSignedUrl("/plugins/{$tag->plugin_id}/tags/{$tag->id}.zip?is_premium=true");
 
-// Example: Download the paid version of the plugin to a local file.
-if (file_put_contents($local_file_path, file_get_contents($paid_version_download_url))) {
-    // If the download was successful, the file will be saved locally.
-    // You can perform additional actions here such as logging or notification.
+    } else {
+        echo "Freemius connection failed!\n";
+        // Troubleshooting: Clock Synchronization
+        // The Freemius API uses timestamps for security.  If your server's clock is out of sync, 
+        // you may encounter errors.  The following code helps detect and correct clock differences.
+        $clockDiff = $fs->FindClockDiff();
+        Freemius::SetClockDiff($clockDiff);
+        if ($fs->Test()) {
+            echo "Connection successful after clock sync.\n";
+        } else {
+            echo "Connection still failed. Check your credentials and ensure your server can reach the Freemius API.\n";
+        }
+    }
+
+
+} catch (Freemius_Exception $e) {
+    echo "Freemius API Error: " . $e->getMessage() . " (Code: " . $e->getStringCode() . ")\n";
+    // Handle the Freemius-specific exception, potentially logging the error or displaying a user-friendly message.
+    // You can access more details about the error using $e->getResult().
+} catch (\Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+    // Handle other exceptions
 }
-
-// Output the tag details (version info) returned from the API.
-print_r($tag);
 ```
+
+## Authentication
+
+The SDK handles authentication automatically. You provide your public and secret keys during initialization.  The SDK uses a signature-based authentication method, generating a unique signature for each API request to ensure security.
+
+## Scopes
+
+The `$scope` parameter is critical and determines the context of your API interactions. It specifies which Freemius entity the SDK will operate on and dictates which API endpoints are accessible.  Here's a summary of common scopes:
+
+| Scope       | Description                                                     | ID Used                     |
+|-------------|-----------------------------------------------------------------|------------------------------|
+| `plugin`    | Access data for a specific plugin.                             | Plugin ID                    |
+| `developer` | Access data across all plugins under your developer account.    | Developer ID                  |
+| `install`   | Access data for a single plugin installation on a website.      | Installation ID               |
+| `user`      | Access data related to a specific Freemius user.                 | User ID                      |
+| `app`       | Access app level data | App ID |
+
+
+
+## API Calls
+
+The `Api()` method is the primary way to interact with the Freemius API:
+
+```php
+$response = $fs->Api('/endpoint.json', 'GET', $params, $fileParams); 
+```
+
+* **`$endpoint`**: The API endpoint path relative to the base path determined by the scope.  For example, `/plugins.json` (to list plugins under a developer account – developer scope), `/.json` (to get the current plugin's information - plugin scope), or  `/installs.json` (to list installs of a plugin - plugin scope).
+* **`$method`**: The HTTP method (e.g., `'GET'`, `'POST'`, `'PUT'`, `'DELETE'`). Defaults to 'GET'.
+* **`$params`**: An associative array of parameters for the request (e.g., query parameters or JSON data for POST requests).  For multipart requests (file uploads), include any extra JSON data under the 'data' key as a JSON encoded string.
+* **`$fileParams`**: An associative array for multipart form uploads (e.g. plugin deployments). The key is the field name (e.g., 'file'), and the value is the file path.
+
+
+The `Api()` method returns the decoded JSON response from the Freemius API or the raw response if decoding fails.  The Freemius API primarily uses JSON for data exchange.
+
+
+## Signed URLs
+
+Generate secure, time-limited URLs for accessing protected resources:
+
+```php
+$signedUrl = $fs->GetSignedUrl('/endpoint.json?param1=value1'); // Include query parameters as needed
+```
+
+Signed URLs are useful for scenarios where you need to provide direct access to a resource without sharing your secret key.
+
+
+
+## Sandbox Mode
+
+Test your integration without affecting live data by enabling sandbox mode:
+
+```php
+$fs = new Freemius($scope, $id, $publicKey, $secretKey, true); // true enables sandbox mode
+```
+
+Make sure to use your sandbox API credentials when testing in sandbox mode.
+
+
+## Error Handling
+
+The SDK may throw exceptions during API interactions.  Proper error handling is essential:
+
+```php
+try {
+    $response = $fs->Api('/endpoint.json');
+// ... (other example code as before)
+```
+
+
+
+## Key API Endpoints and Examples
+
+Here's a summary with examples to help you get started:
+
+**Plugin Scope:**
+
+* Get Plugin Details: `$fs->Api('/.json')`
+* Get Latest Version Info: `$fs->Api('/updates/latest.json')`
+* Deploy New Version (Simple): `$fs->Api('/plugins/YOUR_PLUGIN_ID/tags.json', 'POST', [], ['file' => './my-plugin.zip'])`
+* Deploy New Version (With Additional Data): `$fs->Api('/plugins/YOUR_PLUGIN_ID/tags.json', 'POST', ['data' => json_encode(['add_contributor' => true])], ['file' => './my-plugin.zip'])`
+* Deploy New Version (With Release Mode): `$fs->Api('/plugins/YOUR_PLUGIN_ID/tags.json', 'POST', ['data' => json_encode(['release_mode' => 'released'])], ['file' => './my-plugin.zip'])`
+
+
+**Developer Scope:**
+
+* Get all Plugins: `$fs->Api('/plugins.json')`
+* Get all Installs of a Plugin: `$fs->Api('/plugins/{plugin_id}/installs.json')`  (Replace `{plugin_id}` with the actual ID)
+* Create a Developer: $fs->Api('/apps/YOUR_APP_ID/developers.json', 'POST', $developerData);
+* Get Developer's billing information: $fs->Api('/developers/YOUR_DEV_ID/billing.json', 'GET');
+* Get Developer's balance: $fs->Api('/apps/YOUR_APP_ID/developers/YOUR_DEV_ID/balance.json', 'GET');
+
+
+**Install Scope:**
+
+* Get Install Details: `$fs->Api('/.json')`
+* Start a Trial (for a plan): `$fs->Api('/plans/{plan_id}/trials.json', 'POST')`(Replace `{plan_id}` with the actual ID)
+* Deactivate an Install's License: `$fs->Api('/licenses/{license_id}.json', 'DELETE')` (Replace `{license_id}` with the actual ID)
+* Retrieve an install's uninstall details :  `$fs->Api('/uninstall.json', 'GET')`
+* Get install's plan:  `$fs->Api('/plans.json', 'GET')`
+
+
+**User Scope:**
+
+* Get User Details: `$fs->Api('/.json')`
+* Get User's Installs of a Plugin: `$fs->Api('/plugins/{plugin_id}/installs.json')` (Replace `{plugin_id}` with the actual ID)
+* Sync User with Freemius: `$fs->Api('/plugins/{YOUR_PLUGIN_ID}/users/{user_id}.json', 'PUT', $userData)`
+
+
+Remember to replace placeholders like `YOUR_PLUGIN_ID`, `YOUR_APP_ID`,`YOUR_DEV_ID`, `pk_YOUR_PUBLIC_KEY`, and `sk_YOUR_SECRET_KEY` with your actual values.  Consult the Freemius API documentation for details on request parameters and response formats.
+
+
+## License
+
+GPL-2.0+
